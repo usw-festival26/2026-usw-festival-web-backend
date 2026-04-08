@@ -1,6 +1,7 @@
 package com.usw.festival.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +75,14 @@ class BoothEntityMappingTest {
         );
 
         assertThat(menuStatus).isEqualTo("SOLD_OUT");
+    }
+
+    @Test
+    void boothMenuRejectsNullStatus() {
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
+
+        assertThatThrownBy(() -> new BoothMenu(booth, "떡볶이", 4000, "", null, null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("status must not be null");
     }
 }

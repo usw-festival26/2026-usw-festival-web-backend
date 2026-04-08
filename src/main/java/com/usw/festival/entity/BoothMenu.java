@@ -1,5 +1,7 @@
 package com.usw.festival.entity;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,7 +51,7 @@ public class BoothMenu extends BaseTimeEntity {
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.status = status;
+        this.status = Objects.requireNonNull(status, "status must not be null");
     }
 
     public void update(String name, Integer price, String description, String imageUrl, BoothMenuStatus status) {
