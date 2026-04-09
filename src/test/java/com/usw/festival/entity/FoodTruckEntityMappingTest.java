@@ -30,4 +30,24 @@ class FoodTruckEntityMappingTest {
         assertThat(savedFoodTruck.getName()).isEqualTo("불초밥 트럭");
         assertThat(savedFoodTruck.getDescription()).isEqualTo("불초밥과 닭꼬치를 판매한다.");
     }
+
+    @Test
+    void updateKeepsImageUrlWhenNullIsPassed() {
+        FoodTruck foodTruck = new FoodTruck("불초밥 트럭", "불초밥과 닭꼬치를 판매한다.", "https://example.com/food-truck.jpg");
+
+        foodTruck.update("타코 트럭", null, null);
+
+        assertThat(foodTruck.getName()).isEqualTo("타코 트럭");
+        assertThat(foodTruck.getDescription()).isEqualTo("불초밥과 닭꼬치를 판매한다.");
+        assertThat(foodTruck.getImageUrl()).isEqualTo("https://example.com/food-truck.jpg");
+    }
+
+    @Test
+    void removeImageUrlClearsImage() {
+        FoodTruck foodTruck = new FoodTruck("불초밥 트럭", "불초밥과 닭꼬치를 판매한다.", "https://example.com/food-truck.jpg");
+
+        foodTruck.removeImageUrl();
+
+        assertThat(foodTruck.getImageUrl()).isNull();
+    }
 }

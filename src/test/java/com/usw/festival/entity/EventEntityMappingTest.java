@@ -58,4 +58,25 @@ class EventEntityMappingTest {
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("status must not be null");
     }
+
+    @Test
+    void updateKeepsImageUrlWhenNullIsPassed() {
+        Event event = new Event("보물찾기", "캠퍼스 이벤트", "https://example.com/event.jpg", EventStatus.ONGOING);
+
+        event.update("경품 추첨", null, null, null);
+
+        assertThat(event.getTitle()).isEqualTo("경품 추첨");
+        assertThat(event.getDescription()).isEqualTo("캠퍼스 이벤트");
+        assertThat(event.getStatus()).isEqualTo(EventStatus.ONGOING);
+        assertThat(event.getImageUrl()).isEqualTo("https://example.com/event.jpg");
+    }
+
+    @Test
+    void removeImageUrlClearsImage() {
+        Event event = new Event("보물찾기", "캠퍼스 이벤트", "https://example.com/event.jpg", EventStatus.ONGOING);
+
+        event.removeImageUrl();
+
+        assertThat(event.getImageUrl()).isNull();
+    }
 }

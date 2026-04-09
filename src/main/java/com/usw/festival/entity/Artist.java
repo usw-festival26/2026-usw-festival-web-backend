@@ -40,7 +40,13 @@ public class Artist extends BaseTimeEntity {
         if (description != null) {
             this.description = description;
         }
-        this.imageUrl = imageUrl;
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+    }
+
+    public void removeImageUrl() {
+        this.imageUrl = null;
     }
 
     public Long getId() {

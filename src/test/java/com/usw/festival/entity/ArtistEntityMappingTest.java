@@ -30,4 +30,24 @@ class ArtistEntityMappingTest {
         assertThat(savedArtist.getName()).isEqualTo("잔나비");
         assertThat(savedArtist.getDescription()).isEqualTo("축제 메인 아티스트");
     }
+
+    @Test
+    void updateKeepsImageUrlWhenNullIsPassed() {
+        Artist artist = new Artist("잔나비", "축제 메인 아티스트", "https://example.com/artist.jpg");
+
+        artist.update("데이식스", null, null);
+
+        assertThat(artist.getName()).isEqualTo("데이식스");
+        assertThat(artist.getDescription()).isEqualTo("축제 메인 아티스트");
+        assertThat(artist.getImageUrl()).isEqualTo("https://example.com/artist.jpg");
+    }
+
+    @Test
+    void removeImageUrlClearsImage() {
+        Artist artist = new Artist("잔나비", "축제 메인 아티스트", "https://example.com/artist.jpg");
+
+        artist.removeImageUrl();
+
+        assertThat(artist.getImageUrl()).isNull();
+    }
 }
