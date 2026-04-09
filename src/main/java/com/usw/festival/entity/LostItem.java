@@ -23,9 +23,6 @@ public class LostItem extends BaseTimeEntity {
     @Column(nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false, length = 255)
-    private String storageLocation;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private LostItemStatus status;
@@ -36,10 +33,9 @@ public class LostItem extends BaseTimeEntity {
     protected LostItem() {
     }
 
-    public LostItem(String name, String description, String storageLocation, LostItemStatus status, String imageUrl) {
+    public LostItem(String name, String description, LostItemStatus status, String imageUrl) {
         this.name = name;
         this.description = description;
-        this.storageLocation = storageLocation;
         this.status = status == null ? LostItemStatus.STORED : status;
         this.imageUrl = imageUrl;
     }
@@ -60,10 +56,6 @@ public class LostItem extends BaseTimeEntity {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getStorageLocation() {
-        return storageLocation;
     }
 
     public LostItemStatus getStatus() {
