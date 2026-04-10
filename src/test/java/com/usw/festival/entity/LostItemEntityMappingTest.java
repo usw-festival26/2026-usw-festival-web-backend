@@ -25,6 +25,7 @@ class LostItemEntityMappingTest {
         LostItem lostItem = new LostItem(
                 "검은색 지갑",
                 "학생증과 체크카드가 들어 있음",
+                "총학생회 안내 부스",
                 null,
                 "https://example.com/lost-item.jpg"
         );
@@ -41,7 +42,7 @@ class LostItemEntityMappingTest {
 
     @Test
     void lostItemStatusIsStoredAsString() {
-        LostItem lostItem = new LostItem("검은색 지갑", "분실물 설명", LostItemStatus.CLAIMED, null);
+        LostItem lostItem = new LostItem("검은색 지갑", "분실물 설명", "안내 부스", LostItemStatus.CLAIMED, null);
 
         entityManager.persist(lostItem);
         entityManager.flush();
