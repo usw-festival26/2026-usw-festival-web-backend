@@ -1,0 +1,34 @@
+package com.usw.festival.service;
+
+import com.usw.festival.dto.notice.NoticeDetailResponse;
+import com.usw.festival.dto.notice.NoticeResponse;
+import com.usw.festival.repository.NoticeRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Service
+@Transactional(readOnly = true)
+public class NoticeService {
+
+    private final NoticeRepository noticeRepository;
+
+    public NoticeService(NoticeRepository noticeRepository) {
+        this.noticeRepository = noticeRepository;
+    }
+
+    public List<NoticeResponse> getNotices() {
+        return noticeRepository.findAllByOrderByPinnedDescCreatedAtDesc()
+                .stream()
+                .map(NoticeResponse::from)
+                .toList();
+    }
+
+    public NoticeDetailResponse getNotice(Long id) {
+        return noticeRepository.findById(id)
+                .map(NoticeDetailResponse::from)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 공지사항입니다. id=" + id));
+    }
+}
