@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         GlobalExceptionHandlerTest.TestValidationController.class,
         GlobalExceptionHandlerTest.TestConstraintValidationController.class
 })
+@AutoConfigureMockMvc(addFilters = false)
 @Import({
         GlobalExceptionHandler.class,
         GlobalExceptionHandlerTest.TestValidationController.class,
