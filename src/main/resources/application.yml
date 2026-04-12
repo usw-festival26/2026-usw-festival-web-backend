@@ -2,7 +2,7 @@ spring:
   application:
     name: 2026-usw-festival-web-backend
   datasource:
-    url: ${SUPABASE_DB_URL:jdbc:postgresql://aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0}
+    url: ${SUPABASE_DB_URL}
     username: ${SUPABASE_DB_USERNAME}
     password: ${SUPABASE_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -18,3 +18,16 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+        same-site: none
+
+app:
+  security:
+    cors:
+      allowed-origins: ${ADMIN_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173}
