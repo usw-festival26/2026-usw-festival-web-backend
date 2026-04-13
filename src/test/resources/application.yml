@@ -8,3 +8,18 @@ spring:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: FESTIVALSESSION
+        http-only: true
+        secure: true
+        same-site: none
+
+app:
+  security:
+    cors:
+      allowed-origins:
+        - https://admin.example.com

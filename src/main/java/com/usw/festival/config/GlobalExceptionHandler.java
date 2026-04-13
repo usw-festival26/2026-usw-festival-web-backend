@@ -7,6 +7,8 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,6 +87,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
+        if (e instanceof AuthenticationException authenticationException) {
+            throw authenticationException;
+        }
+        if (e instanceof AccessDeniedException accessDeniedException) {
+            throw accessDeniedException;
+        }
+
         log.error(
                 "Unhandled exception occurred. path={}, exception={}",
                 request.getRequestURI(),
