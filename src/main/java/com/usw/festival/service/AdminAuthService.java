@@ -7,6 +7,7 @@ import com.usw.festival.repository.AdminAccountRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,12 +23,14 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
 @Service
 public class AdminAuthService {
 
+    private static final String DEFAULT_SESSION_COOKIE_NAME = "JSESSIONID";
     private static final String INVALID_CREDENTIALS_MESSAGE = "아이디 또는 비밀번호가 올바르지 않습니다.";
 
     private final AdminAccountRepository adminAccountRepository;
@@ -35,11 +38,13 @@ public class AdminAuthService {
     private final SecurityContextRepository securityContextRepository;
     private final CsrfTokenRepository csrfTokenRepository;
     private final SecurityContextLogoutHandler securityContextLogoutHandler;
+    private final String sessionCookieName;
 
     public AdminAuthService(AdminAccountRepository adminAccountRepository,
                             PasswordEncoder passwordEncoder,
                             SecurityContextRepository securityContextRepository,
-                            CsrfTokenRepository csrfTokenRepository) {
+                            CsrfTokenRepository csrfTokenRepository,
+                            ServerProperties serverProperties) {
         this.adminAccountRepository = adminAccountRepository;
         this.passwordEncoder = passwordEncoder;
         this.securityContextRepository = securityContextRepository;
@@ -47,6 +52,7 @@ public class AdminAuthService {
         this.securityContextLogoutHandler = new SecurityContextLogoutHandler();
         this.securityContextLogoutHandler.setInvalidateHttpSession(true);
         this.securityContextLogoutHandler.setClearAuthentication(true);
+        this.sessionCookieName = resolveSessionCookieName(serverProperties);
     }
 
     public AdminLoginResponse login(AdminLoginRequest request,
@@ -93,7 +99,7 @@ public class AdminAuthService {
     }
 
     private void expireSessionCookie(HttpServletResponse response) {
-        ResponseCookie expiredSessionCookie = ResponseCookie.from("JSESSIONID", "")
+        ResponseCookie expiredSessionCookie = ResponseCookie.from(sessionCookieName, "")
                 .path("/")
                 .httpOnly(true)
                 .secure(true)
@@ -101,6 +107,14 @@ public class AdminAuthService {
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, expiredSessionCookie.toString());
+    }
+
+    private String resolveSessionCookieName(ServerProperties serverProperties) {
+        String configuredCookieName = serverProperties.getServlet().getSession().getCookie().getName();
+        if (StringUtils.hasText(configuredCookieName)) {
+            return configuredCookieName;
+        }
+        return DEFAULT_SESSION_COOKIE_NAME;
     }
 
     private BadCredentialsException badCredentials() {

@@ -39,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(AdminAuthControllerIntegrationTest.TestAdminProtectedController.class)
 class AdminAuthControllerIntegrationTest {
 
+    private static final String TEST_SESSION_COOKIE_NAME = "FESTIVALSESSION";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -159,12 +161,16 @@ class AdminAuthControllerIntegrationTest {
     void logoutInvalidatesSession() throws Exception {
         LoginSession loginSession = login("student-admin", "student-password");
 
-        mockMvc.perform(post("/api/admin/auth/logout")
+        MvcResult result = mockMvc.perform(post("/api/admin/auth/logout")
                         .secure(true)
                         .session(loginSession.session())
                         .cookie(loginSession.csrfCookie())
                         .header("X-XSRF-TOKEN", loginSession.csrfCookie().getValue()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
+                .anyMatch(header -> header.contains(TEST_SESSION_COOKIE_NAME + "="));
 
         mockMvc.perform(get("/api/admin/test/student")
                         .session(loginSession.session()))
