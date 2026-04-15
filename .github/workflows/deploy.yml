@@ -28,7 +28,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          fingerprint: ${{ secrets.EC2_HOST_FINGERPRINT }}
           source: "build/libs/*.jar"
           target: "/home/${{ secrets.EC2_USERNAME }}/deploy"
           strip_components: 2
@@ -39,7 +38,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          fingerprint: ${{ secrets.EC2_HOST_FINGERPRINT }}
           script: |
             set -eu
 
