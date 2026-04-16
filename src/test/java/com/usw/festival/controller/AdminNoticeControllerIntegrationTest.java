@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -185,6 +186,29 @@ class AdminNoticeControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.fieldErrors").isArray());
+    }
+
+    @Test
+    void createNoticeRejectsHtmlTagsInTitleAndContent() throws Exception {
+        LoginSession loginSession = login("student-admin", "student-password");
+        NoticeSaveRequest request = new NoticeSaveRequest(
+                "<b>공지 제목</b>",
+                "<script>alert('xss')</script>공지 본문",
+                true
+        );
+
+        mockMvc.perform(post("/api/admin/notices")
+                        .secure(true)
+                        .session(loginSession.session())
+                        .cookie(loginSession.csrfCookie())
+                        .header("X-XSRF-TOKEN", loginSession.csrfCookie().getValue())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("title")))
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("content")));
     }
 
     private LoginSession login(String loginId, String password) throws Exception {
