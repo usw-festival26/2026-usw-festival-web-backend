@@ -1,8 +1,6 @@
 package com.usw.festival.dto.lostitem;
 
-import com.usw.festival.entity.LostItemCategory;
 import com.usw.festival.entity.LostItem;
-import com.usw.festival.entity.LostItemStatus;
 
 public record LostItemResponse(
         Long lostItemId,
@@ -15,17 +13,9 @@ public record LostItemResponse(
         return new LostItemResponse(
                 lostItem.getId(),
                 lostItem.getName(),
-                toLabel(lostItem.getStatus()),
-                toLabel(lostItem.getCategory()),
+                lostItem.getStatus().getLabel(),
+                lostItem.getCategory().getLabel(),
                 lostItem.getImageUrl()
         );
-    }
-
-    private static String toLabel(LostItemStatus status) {
-        return status.getLabel();
-    }
-
-    private static String toLabel(LostItemCategory category) {
-        return category.getLabel();
     }
 }
