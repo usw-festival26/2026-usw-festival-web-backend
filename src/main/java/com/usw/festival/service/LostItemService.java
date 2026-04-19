@@ -1,7 +1,12 @@
 package com.usw.festival.service;
 
+import com.usw.festival.dto.lostitem.LostItemCreateRequest;
 import com.usw.festival.dto.lostitem.LostItemDetailResponse;
 import com.usw.festival.dto.lostitem.LostItemResponse;
+import com.usw.festival.dto.lostitem.LostItemUpdateRequest;
+import com.usw.festival.entity.LostItem;
+import com.usw.festival.entity.LostItemCategory;
+import com.usw.festival.entity.LostItemStatus;
 import com.usw.festival.repository.LostItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +32,45 @@ public class LostItemService {
     }
 
     public LostItemDetailResponse getLostItem(Long id) {
+        return LostItemDetailResponse.from(findLostItem(id));
+    }
+
+    @Transactional
+    public LostItemDetailResponse createLostItem(LostItemCreateRequest request) {
+        LostItem lostItem = lostItemRepository.save(
+                new LostItem(
+                        request.name(),
+                        request.description(),
+                        LostItemStatus.STORED,
+                        toCategory(request.category()),
+                        request.imageUrl()
+                )
+        );
+        return LostItemDetailResponse.from(lostItem);
+    }
+
+    @Transactional
+    public LostItemDetailResponse updateLostItem(Long id, LostItemUpdateRequest request) {
+        LostItem lostItem = findLostItem(id);
+        lostItem.update(
+                request.name(),
+                request.description(),
+                LostItemStatus.valueOf(request.status()),
+                LostItemCategory.valueOf(request.category()),
+                request.imageUrl()
+        );
+        return LostItemDetailResponse.from(lostItem);
+    }
+
+    private LostItem findLostItem(Long id) {
         return lostItemRepository.findById(id)
-                .map(LostItemDetailResponse::from)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 분실물입니다. id=" + id));
+    }
+
+    private LostItemCategory toCategory(String category) {
+        if (category == null) {
+            return null;
+        }
+        return LostItemCategory.valueOf(category);
     }
 }
