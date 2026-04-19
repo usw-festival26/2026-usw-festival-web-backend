@@ -1,5 +1,6 @@
 package com.usw.festival.dto.lostitem;
 
+import com.usw.festival.entity.LostItemCategory;
 import com.usw.festival.entity.LostItem;
 import com.usw.festival.entity.LostItemStatus;
 
@@ -8,6 +9,7 @@ public record LostItemDetailResponse(
         String name,
         String description,
         String status,
+        String category,
         String imageUrl
 ) {
     public static LostItemDetailResponse from(LostItem lostItem) {
@@ -16,14 +18,16 @@ public record LostItemDetailResponse(
                 lostItem.getName(),
                 lostItem.getDescription(),
                 toLabel(lostItem.getStatus()),
+                toLabel(lostItem.getCategory()),
                 lostItem.getImageUrl()
         );
     }
 
     private static String toLabel(LostItemStatus status) {
-        return switch (status) {
-            case STORED -> "보관 중";
-            case CLAIMED -> "수령 완료";
-        };
+        return status.getLabel();
+    }
+
+    private static String toLabel(LostItemCategory category) {
+        return category.getLabel();
     }
 }

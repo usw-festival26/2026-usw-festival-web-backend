@@ -27,23 +27,38 @@ public class LostItem extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private LostItemStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private LostItemCategory category;
+
     @Column(length = 2048)
     private String imageUrl;
 
     protected LostItem() {
     }
 
-    public LostItem(String name, String description, LostItemStatus status, String imageUrl) {
+    public LostItem(String name,
+                    String description,
+                    LostItemStatus status,
+                    LostItemCategory category,
+                    String imageUrl) {
         this.name = name;
         this.description = description;
-        this.status = status == null ? LostItemStatus.STORED : status;
+        this.status = resolveStatus(status);
+        this.category = resolveCategory(category);
         this.imageUrl = imageUrl;
     }
 
-    public void changeStatus(LostItemStatus status) {
-        if (status != null) {
-            this.status = status;
-        }
+    public void update(String name,
+                       String description,
+                       LostItemStatus status,
+                       LostItemCategory category,
+                       String imageUrl) {
+        this.name = name;
+        this.description = description;
+        this.status = resolveStatus(status);
+        this.category = resolveCategory(category);
+        this.imageUrl = imageUrl;
     }
 
     public Long getId() {
@@ -62,7 +77,19 @@ public class LostItem extends BaseTimeEntity {
         return status;
     }
 
+    public LostItemCategory getCategory() {
+        return category == null ? LostItemCategory.OTHER : category;
+    }
+
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    private LostItemStatus resolveStatus(LostItemStatus status) {
+        return status == null ? LostItemStatus.STORED : status;
+    }
+
+    private LostItemCategory resolveCategory(LostItemCategory category) {
+        return category == null ? LostItemCategory.OTHER : category;
     }
 }
