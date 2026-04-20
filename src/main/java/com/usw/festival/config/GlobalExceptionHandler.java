@@ -19,6 +19,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -80,9 +83,24 @@ public class GlobalExceptionHandler {
         return buildValidationResponse(extractFieldErrors(e), request.getRequestURI());
     }
 
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class,
+            MissingServletRequestParameterException.class, IllegalArgumentException.class})
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, BAD_REQUEST, INVALID_REQUEST_MESSAGE, request.getRequestURI());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e,
+                                                                 HttpServletRequest request) {
+        return buildResponse(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED",
+                "지원하지 않는 HTTP 메서드입니다.", request.getRequestURI());
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException e,
+                                                                     HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE",
+                "지원하지 않는 Content-Type입니다.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
