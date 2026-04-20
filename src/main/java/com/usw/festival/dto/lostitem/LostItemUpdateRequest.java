@@ -3,6 +3,7 @@ package com.usw.festival.dto.lostitem;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.URL;
 
 public record LostItemUpdateRequest(
         @NotBlank
@@ -27,6 +28,7 @@ public record LostItemUpdateRequest(
         )
         String status,
 
+        @URL(message = "올바른 URL 형식이어야 합니다.")
         @Size(max = 2048)
         String imageUrl
 ) {

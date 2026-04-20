@@ -219,6 +219,28 @@ class AdminLostItemControllerIntegrationTest {
     }
 
     @Test
+    void invalidImageUrlOnCreateReturnsValidationError() throws Exception {
+        LostItemCreateRequest request = new LostItemCreateRequest(
+                "검은색 지갑",
+                "학생증과 카드가 들어 있음",
+                null,
+                "not-a-url"
+        );
+
+        mockMvc.perform(post("/api/admin/lost-items")
+                        .secure(true)
+                        .with(user("student-admin").roles("STUDENT_COUNCIL"))
+                        .cookie(csrfCookie())
+                        .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("imageUrl")));
+    }
+
+    @Test
     void invalidCategoryOrStatusReturnsValidationError() throws Exception {
         LostItem lostItem = lostItemRepository.save(
                 new LostItem(
@@ -249,6 +271,38 @@ class AdminLostItemControllerIntegrationTest {
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("category")))
                 .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("status")));
+    }
+
+    @Test
+    void invalidImageUrlOnUpdateReturnsValidationError() throws Exception {
+        LostItem lostItem = lostItemRepository.save(
+                new LostItem(
+                        "검은색 지갑",
+                        "학생증과 카드가 들어 있음",
+                        LostItemStatus.STORED,
+                        LostItemCategory.OTHER,
+                        null
+                )
+        );
+        LostItemUpdateRequest request = new LostItemUpdateRequest(
+                "무선 이어폰",
+                "검은색 케이스 포함",
+                "ELECTRONICS",
+                "CLAIMED",
+                "not-a-url"
+        );
+
+        mockMvc.perform(put("/api/admin/lost-items/{id}", lostItem.getId())
+                        .secure(true)
+                        .with(user("student-admin").roles("STUDENT_COUNCIL"))
+                        .cookie(csrfCookie())
+                        .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("imageUrl")));
     }
 
     @Test
