@@ -2,13 +2,13 @@ package com.usw.festival.controller;
 
 import com.usw.festival.entity.Artist;
 import com.usw.festival.repository.ArtistRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class ArtistControllerIntegrationTest {
 
     @Autowired
@@ -24,11 +25,6 @@ class ArtistControllerIntegrationTest {
 
     @Autowired
     private ArtistRepository artistRepository;
-
-    @BeforeEach
-    void setUp() {
-        artistRepository.deleteAll();
-    }
 
     @Test
     void getArtistsReturnsAllArtistsOrderedByIdAsc() throws Exception {

@@ -3,13 +3,13 @@ package com.usw.festival.controller;
 import com.usw.festival.entity.Event;
 import com.usw.festival.entity.EventStatus;
 import com.usw.festival.repository.EventRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class EventControllerIntegrationTest {
 
     @Autowired
@@ -25,11 +26,6 @@ class EventControllerIntegrationTest {
 
     @Autowired
     private EventRepository eventRepository;
-
-    @BeforeEach
-    void setUp() {
-        eventRepository.deleteAll();
-    }
 
     @Test
     void getEventsReturnsAllEventsOrderedByIdAsc() throws Exception {
