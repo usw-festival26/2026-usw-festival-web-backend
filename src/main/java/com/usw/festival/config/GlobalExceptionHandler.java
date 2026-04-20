@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class,
-            MissingServletRequestParameterException.class, IllegalArgumentException.class})
+            MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, BAD_REQUEST, INVALID_REQUEST_MESSAGE, request.getRequestURI());
     }
