@@ -16,10 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -177,7 +177,7 @@ class AdminBoothControllerIntegrationTest {
                 null
         );
 
-        mockMvc.perform(put("/api/admin/booths/{id}", booth.getId())
+        mockMvc.perform(patch("/api/admin/booths/{id}", booth.getId())
                         .secure(true)
                         .with(user("department-admin").roles("DEPARTMENT_COUNCIL"))
                         .cookie(csrfCookie())
@@ -204,7 +204,7 @@ class AdminBoothControllerIntegrationTest {
                 new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감")
         );
 
-        mockMvc.perform(put("/api/admin/booths/{id}", booth.getId())
+        mockMvc.perform(patch("/api/admin/booths/{id}", booth.getId())
                         .secure(true)
                         .with(user("department-admin").roles("DEPARTMENT_COUNCIL"))
                         .cookie(csrfCookie())
@@ -236,7 +236,7 @@ class AdminBoothControllerIntegrationTest {
                 null
         );
 
-        mockMvc.perform(put("/api/admin/booths/{id}", booth.getId())
+        mockMvc.perform(patch("/api/admin/booths/{id}", booth.getId())
                         .secure(true)
                         .with(user("department-admin").roles("DEPARTMENT_COUNCIL"))
                         .cookie(csrfCookie())
@@ -263,7 +263,7 @@ class AdminBoothControllerIntegrationTest {
     void updateUnknownBoothReturnsNotFound() throws Exception {
         BoothUpdateRequest request = new BoothUpdateRequest("새 이름", null, null);
 
-        mockMvc.perform(put("/api/admin/booths/999")
+        mockMvc.perform(patch("/api/admin/booths/999")
                         .secure(true)
                         .with(user("department-admin").roles("DEPARTMENT_COUNCIL"))
                         .cookie(csrfCookie())
