@@ -1,6 +1,7 @@
 package com.usw.festival.dto.event;
 
 import com.usw.festival.entity.Event;
+import com.usw.festival.entity.EventStatus;
 
 import java.time.LocalDateTime;
 
@@ -18,8 +19,15 @@ public record EventResponse(
                 event.getTitle(),
                 event.getDescription(),
                 event.getImageUrl(),
-                event.getStatus().name().toLowerCase(),
+                toStatusLabel(event.getStatus()),
                 event.getCreatedAt()
         );
+    }
+
+    private static String toStatusLabel(EventStatus status) {
+        return switch (status) {
+            case ONGOING -> "진행 중";
+            case COMPLETED -> "종료";
+        };
     }
 }

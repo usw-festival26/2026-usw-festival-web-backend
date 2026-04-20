@@ -41,9 +41,9 @@ class EventControllerIntegrationTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].title").value("이벤트B"))
-                .andExpect(jsonPath("$[0].status").value("completed"))
+                .andExpect(jsonPath("$[0].status").value("종료"))
                 .andExpect(jsonPath("$[1].title").value("이벤트A"))
-                .andExpect(jsonPath("$[1].status").value("ongoing"));
+                .andExpect(jsonPath("$[1].status").value("진행 중"));
     }
 
     @Test
@@ -65,7 +65,7 @@ class EventControllerIntegrationTest {
                 .andExpect(jsonPath("$.title").value("축제 오프닝"))
                 .andExpect(jsonPath("$.description").value("개막식 이벤트"))
                 .andExpect(jsonPath("$.imageUrl").value("https://example.com/opening.jpg"))
-                .andExpect(jsonPath("$.status").value("ongoing"))
+                .andExpect(jsonPath("$.status").value("진행 중"))
                 .andExpect(jsonPath("$.createdAt").isString());
     }
 
