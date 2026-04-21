@@ -44,8 +44,12 @@ public class Booth extends BaseTimeEntity {
         if (description != null) {
             this.description = description;
         }
-        this.imageUrl = imageUrl;
-        this.notice = notice;
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        if (notice != null) {
+            this.notice = notice;
+        }
     }
 
     public Long getId() {
