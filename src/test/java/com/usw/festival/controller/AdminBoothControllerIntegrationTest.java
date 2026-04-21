@@ -573,7 +573,7 @@ class AdminBoothControllerIntegrationTest {
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
         );
-        BoothMenuStatusUpdateRequest request = new BoothMenuStatusUpdateRequest("SOLD_OUT");
+        BoothMenuStatusUpdateRequest request = new BoothMenuStatusUpdateRequest(BoothMenuStatus.SOLD_OUT);
 
         mockMvc.perform(patch("/api/admin/booths/{boothId}/menus/{menuId}/status", booth.getId(), boothMenu.getId())
                         .secure(true)
@@ -598,7 +598,6 @@ class AdminBoothControllerIntegrationTest {
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
         );
-        BoothMenuStatusUpdateRequest request = new BoothMenuStatusUpdateRequest("INVALID");
 
         mockMvc.perform(patch("/api/admin/booths/{boothId}/menus/{menuId}/status", booth.getId(), boothMenu.getId())
                         .secure(true)
@@ -606,7 +605,7 @@ class AdminBoothControllerIntegrationTest {
                         .cookie(csrfCookie())
                         .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content("{\"status\":\"INVALID\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))

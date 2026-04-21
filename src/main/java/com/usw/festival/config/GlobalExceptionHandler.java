@@ -1,5 +1,6 @@
 package com.usw.festival.config;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.usw.festival.dto.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -44,6 +45,7 @@ public class GlobalExceptionHandler {
     private static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     private static final String INVALID_REQUEST_MESSAGE = "잘못된 요청입니다.";
     private static final String VALIDATION_ERROR_MESSAGE = "요청 값이 올바르지 않습니다.";
+    private static final String INVALID_ENUM_VALUE_MESSAGE = "허용되지 않는 값입니다.";
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "서버 내부 오류가 발생했습니다.";
     private static final String NO_RESOURCE_FOUND_MESSAGE = "존재하지 않는 요청 경로입니다.";
 
@@ -80,8 +82,26 @@ public class GlobalExceptionHandler {
         return buildValidationResponse(extractFieldErrors(e), request.getRequestURI());
     }
 
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
-    public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(Exception e, HttpServletRequest request) {
+        return buildResponse(HttpStatus.BAD_REQUEST, BAD_REQUEST, INVALID_REQUEST_MESSAGE, request.getRequestURI());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e,
+                                                                      HttpServletRequest request) {
+        InvalidFormatException invalidFormatException = findInvalidFormatException(e);
+        if (invalidFormatException != null
+                && invalidFormatException.getTargetType() != null
+                && invalidFormatException.getTargetType().isEnum()) {
+            return buildValidationResponse(
+                    List.of(new ErrorResponse.FieldErrorDetail(
+                            resolveJsonFieldName(invalidFormatException),
+                            INVALID_ENUM_VALUE_MESSAGE
+                    )),
+                    request.getRequestURI()
+            );
+        }
         return buildResponse(HttpStatus.BAD_REQUEST, BAD_REQUEST, INVALID_REQUEST_MESSAGE, request.getRequestURI());
     }
 
@@ -208,6 +228,29 @@ public class GlobalExceptionHandler {
         for (Path.Node node : violation.getPropertyPath()) {
             if (StringUtils.hasText(node.getName())) {
                 fieldName = node.getName();
+            }
+        }
+
+        return fieldName != null ? fieldName : "request";
+    }
+
+    private InvalidFormatException findInvalidFormatException(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof InvalidFormatException invalidFormatException) {
+                return invalidFormatException;
+            }
+            current = current.getCause();
+        }
+        return null;
+    }
+
+    private String resolveJsonFieldName(InvalidFormatException exception) {
+        String fieldName = null;
+
+        for (var reference : exception.getPath()) {
+            if (StringUtils.hasText(reference.getFieldName())) {
+                fieldName = reference.getFieldName();
             }
         }
 

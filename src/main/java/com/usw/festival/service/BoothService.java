@@ -127,7 +127,7 @@ public class BoothService {
                 null,
                 null,
                 null,
-                BoothMenuStatus.valueOf(request.status())
+                request.status()
         );
         return AdminBoothMenuResponse.from(boothMenu);
     }
