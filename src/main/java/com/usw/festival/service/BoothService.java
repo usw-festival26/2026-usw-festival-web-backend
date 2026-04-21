@@ -1,14 +1,12 @@
 package com.usw.festival.service;
 
 import com.usw.festival.dto.booth.AdminBoothMenuResponse;
-import com.usw.festival.dto.booth.BoothCreateRequest;
 import com.usw.festival.dto.booth.BoothDetailResponse;
 import com.usw.festival.dto.booth.BoothMenuCreateRequest;
 import com.usw.festival.dto.booth.BoothMenuResponse;
 import com.usw.festival.dto.booth.BoothResponse;
 import com.usw.festival.dto.booth.BoothMenuStatusUpdateRequest;
 import com.usw.festival.dto.booth.BoothMenuUpdateRequest;
-import com.usw.festival.dto.booth.BoothUpdateRequest;
 import com.usw.festival.entity.Booth;
 import com.usw.festival.entity.BoothMenu;
 import com.usw.festival.entity.BoothMenuStatus;
