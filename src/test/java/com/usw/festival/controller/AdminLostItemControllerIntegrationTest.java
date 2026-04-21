@@ -160,6 +160,29 @@ class AdminLostItemControllerIntegrationTest {
     }
 
     @Test
+    void studentCouncilCanCreateLostItemWithDisplayedCategoryLabel() throws Exception {
+        LostItemCreateRequest request = new LostItemCreateRequest(
+                "검은색 지갑",
+                "학생증과 카드가 들어 있음",
+                "지갑/카드",
+                null
+        );
+
+        mockMvc.perform(post("/api/admin/lost-items")
+                        .secure(true)
+                        .with(user("student-admin").roles("STUDENT_COUNCIL"))
+                        .cookie(csrfCookie())
+                        .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.category").value("지갑/카드"));
+
+        LostItem savedLostItem = lostItemRepository.findAll().getFirst();
+        assertThat(savedLostItem.getCategory()).isEqualTo(LostItemCategory.WALLET_CARD);
+    }
+
+    @Test
     void studentCouncilCanUpdateLostItem() throws Exception {
         LostItem lostItem = lostItemRepository.save(
                 new LostItem(
@@ -199,6 +222,43 @@ class AdminLostItemControllerIntegrationTest {
         assertThat(updatedLostItem.getStatus()).isEqualTo(LostItemStatus.CLAIMED);
         assertThat(updatedLostItem.getCategory()).isEqualTo(LostItemCategory.ELECTRONICS);
         assertThat(updatedLostItem.getImageUrl()).isNull();
+    }
+
+    @Test
+    void studentCouncilCanUpdateLostItemUsingDisplayedCategoryAndStatusLabels() throws Exception {
+        LostItem lostItem = lostItemRepository.save(
+                new LostItem(
+                        "검은색 지갑",
+                        "학생증과 카드가 들어 있음",
+                        LostItemStatus.STORED,
+                        LostItemCategory.OTHER,
+                        null
+                )
+        );
+        LostItemUpdateRequest request = new LostItemUpdateRequest(
+                "무선 이어폰",
+                "검은색 케이스 포함",
+                "전자기기",
+                "수령 완료",
+                "https://example.com/updated-image.jpg"
+        );
+
+        mockMvc.perform(put("/api/admin/lost-items/{id}", lostItem.getId())
+                        .secure(true)
+                        .with(user("student-admin").roles("STUDENT_COUNCIL"))
+                        .cookie(csrfCookie())
+                        .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("수령 완료"))
+                .andExpect(jsonPath("$.category").value("전자기기"))
+                .andExpect(jsonPath("$.imageUrl").value("https://example.com/updated-image.jpg"));
+
+        LostItem updatedLostItem = lostItemRepository.findById(lostItem.getId()).orElseThrow();
+        assertThat(updatedLostItem.getStatus()).isEqualTo(LostItemStatus.CLAIMED);
+        assertThat(updatedLostItem.getCategory()).isEqualTo(LostItemCategory.ELECTRONICS);
+        assertThat(updatedLostItem.getImageUrl()).isEqualTo("https://example.com/updated-image.jpg");
     }
 
     @Test

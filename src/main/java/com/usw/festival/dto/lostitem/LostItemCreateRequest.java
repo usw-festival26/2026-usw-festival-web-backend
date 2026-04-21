@@ -15,7 +15,7 @@ public record LostItemCreateRequest(
         String description,
 
         @Pattern(
-                regexp = "ELECTRONICS|WALLET_CARD|CLOTHING_BAG|OTHER",
+                regexp = "ELECTRONICS|WALLET_CARD|CLOTHING_BAG|OTHER|전자기기|지갑/카드|의류/가방|기타",
                 message = "허용되지 않는 분실물 카테고리입니다."
         )
         String category,
