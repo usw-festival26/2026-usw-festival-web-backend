@@ -55,8 +55,8 @@ public class LostItemService {
         lostItem.update(
                 request.name(),
                 request.description(),
-                LostItemStatus.valueOf(request.status()),
-                LostItemCategory.valueOf(request.category()),
+                LostItemStatus.from(request.status()),
+                LostItemCategory.from(request.category()),
                 request.imageUrl()
         );
         return LostItemDetailResponse.from(lostItem);
@@ -71,6 +71,6 @@ public class LostItemService {
         if (category == null) {
             return null;
         }
-        return LostItemCategory.valueOf(category);
+        return LostItemCategory.from(category);
     }
 }

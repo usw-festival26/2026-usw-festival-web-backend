@@ -87,6 +87,23 @@ class BoothEntityMappingTest {
     }
 
     @Test
+    void boothUpdateKeepsImageUrlAndNoticeWhenNullIsPassed() {
+        Booth booth = new Booth(
+                "컴퓨터학부",
+                "분식 판매",
+                "https://example.com/booth.jpg",
+                "재료 소진 시 조기 마감"
+        );
+
+        booth.update("소프트웨어학과", null, null, null);
+
+        assertThat(booth.getName()).isEqualTo("소프트웨어학과");
+        assertThat(booth.getDescription()).isEqualTo("분식 판매");
+        assertThat(booth.getImageUrl()).isEqualTo("https://example.com/booth.jpg");
+        assertThat(booth.getNotice()).isEqualTo("재료 소진 시 조기 마감");
+    }
+
+    @Test
     void boothMenuUpdateKeepsImageUrlAndStatusWhenNullIsPassed() {
         Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
         BoothMenu boothMenu = new BoothMenu(

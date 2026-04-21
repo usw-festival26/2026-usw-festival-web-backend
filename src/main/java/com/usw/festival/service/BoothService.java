@@ -1,12 +1,14 @@
 package com.usw.festival.service;
 
 import com.usw.festival.dto.booth.AdminBoothMenuResponse;
+import com.usw.festival.dto.booth.BoothCreateRequest;
 import com.usw.festival.dto.booth.BoothDetailResponse;
 import com.usw.festival.dto.booth.BoothMenuCreateRequest;
-import com.usw.festival.dto.booth.BoothMenuResponse;
-import com.usw.festival.dto.booth.BoothResponse;
 import com.usw.festival.dto.booth.BoothMenuStatusUpdateRequest;
+import com.usw.festival.dto.booth.BoothMenuResponse;
 import com.usw.festival.dto.booth.BoothMenuUpdateRequest;
+import com.usw.festival.dto.booth.BoothResponse;
+import com.usw.festival.dto.booth.BoothUpdateRequest;
 import com.usw.festival.entity.Booth;
 import com.usw.festival.entity.BoothMenu;
 import com.usw.festival.entity.BoothMenuStatus;
@@ -38,9 +40,32 @@ public class BoothService {
     }
 
     public BoothDetailResponse getBooth(Long id) {
-        return boothRepository.findById(id)
-                .map(BoothDetailResponse::from)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부스입니다. id=" + id));
+        return BoothDetailResponse.from(findBooth(id));
+    }
+
+    @Transactional
+    public BoothDetailResponse createBooth(BoothCreateRequest request) {
+        Booth booth = boothRepository.save(
+                new Booth(
+                        request.name(),
+                        request.description(),
+                        request.imageUrl(),
+                        null
+                )
+        );
+        return BoothDetailResponse.from(booth);
+    }
+
+    @Transactional
+    public BoothDetailResponse updateBooth(Long id, BoothUpdateRequest request) {
+        Booth booth = findBooth(id);
+        booth.update(
+                request.name(),
+                request.description(),
+                request.imageUrl(),
+                null
+        );
+        return BoothDetailResponse.from(booth);
     }
 
     public List<BoothMenuResponse> getBoothMenus(Long boothId) {

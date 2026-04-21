@@ -1,9 +1,13 @@
 package com.usw.festival.controller;
 
 import com.usw.festival.dto.booth.AdminBoothMenuResponse;
+import com.usw.festival.dto.booth.BoothCreateRequest;
+import com.usw.festival.dto.booth.BoothDetailResponse;
 import com.usw.festival.dto.booth.BoothMenuCreateRequest;
 import com.usw.festival.dto.booth.BoothMenuStatusUpdateRequest;
 import com.usw.festival.dto.booth.BoothMenuUpdateRequest;
+import com.usw.festival.dto.booth.BoothResponse;
+import com.usw.festival.dto.booth.BoothUpdateRequest;
 import com.usw.festival.service.BoothService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,28 @@ public class AdminBoothController {
 
     public AdminBoothController(BoothService boothService) {
         this.boothService = boothService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BoothResponse>> getBooths() {
+        return ResponseEntity.ok(boothService.getBooths());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BoothDetailResponse> getBooth(@PathVariable Long id) {
+        return ResponseEntity.ok(boothService.getBooth(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<BoothDetailResponse> createBooth(@Valid @RequestBody BoothCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(boothService.createBooth(request));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<BoothDetailResponse> updateBooth(@PathVariable Long id,
+                                                           @Valid @RequestBody BoothUpdateRequest request) {
+        return ResponseEntity.ok(boothService.updateBooth(id, request));
     }
 
     @GetMapping("/{boothId}/menus")
