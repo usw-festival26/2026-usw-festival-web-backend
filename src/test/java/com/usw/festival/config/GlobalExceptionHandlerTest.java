@@ -157,6 +157,21 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void invalidEnumRequestBodyIsReturnedAsValidationErrorJson() throws Exception {
+        mockMvc.perform(post("/test/enum-validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"INVALID\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("요청 값이 올바르지 않습니다."))
+                .andExpect(jsonPath("$.path").value("/test/enum-validation"))
+                .andExpect(jsonPath("$.timestamp").isString())
+                .andExpect(jsonPath("$.fieldErrors[0].field").value("status"));
+    }
+
+    @Test
     void unexpectedExceptionDoesNotExposeRawMessage() throws Exception {
         given(boothService.getBooth(1L))
                 .willThrow(new IllegalStateException("raw internal details"));
@@ -182,6 +197,11 @@ class GlobalExceptionHandlerTest {
             return "ok";
         }
 
+        @PostMapping("/enum-validation")
+        public String validateEnumBody(@RequestBody EnumValidationRequest request) {
+            return "ok";
+        }
+
         @GetMapping("/method-validation")
         public String validateRequestParam(@RequestParam("page") @Min(1) Integer page) {
             return "ok";
@@ -202,5 +222,15 @@ class GlobalExceptionHandlerTest {
     public record ValidationRequest(
             @NotBlank String name
     ) {
+    }
+
+    public record EnumValidationRequest(
+            TestStatus status
+    ) {
+    }
+
+    public enum TestStatus {
+        ON_SALE,
+        SOLD_OUT
     }
 }

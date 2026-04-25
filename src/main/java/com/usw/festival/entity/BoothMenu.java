@@ -64,7 +64,9 @@ public class BoothMenu extends BaseTimeEntity {
         if (description != null) {
             this.description = description;
         }
-        this.imageUrl = imageUrl;
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
         if (status != null) {
             this.status = status;
         }
