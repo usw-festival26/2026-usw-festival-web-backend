@@ -88,7 +88,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(SecurityCorsProperties securityCorsProperties) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
+        configuration.setAllowedOriginPatterns(
                 securityCorsProperties.getAllowedOrigins().stream()
                         .filter(StringUtils::hasText)
                         .toList()
