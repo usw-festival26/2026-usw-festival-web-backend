@@ -3,7 +3,7 @@ spring:
     name: 2026-usw-festival-web-backend
   datasource:
     url: ${SUPABASE_DB_URL}
-    username: ${SUPABASE_DB_USERNAME}
+    username: ${SUPABASE_DB_USEhttps://github.com/usw-festival26/2026-usw-festival-web-backend/blob/5b7d0a58c02cd0e482d14f89a94a600f52700db2/src/main/resources/application.ymlRNAME}
     password: ${SUPABASE_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -30,4 +30,4 @@ server:
 app:
   security:
     cors:
-      allowed-origins: ${ADMIN_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8081,https://*.uswfestival26-admin.pages.dev,https://*.uswfestival26.pages.dev,https://uswfestival26-admin.pages.dev,https://uswfestival26.pages.dev}
+      allowed-origins: ${ADMIN_ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8081,https://*.uswfestival26-admin.pages.dev,https://*.uswfestival26.pages.dev,https://uswfestival26-admin.pages.dev,https://uswfestival26.pages.dev,https://admin.usw-festival.site,https://usw-festival.site}
