@@ -23,7 +23,13 @@ class BoothEntityMappingTest {
 
     @Test
     void boothCanBePersisted() {
-        Booth booth = new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감");
+        Booth booth = new Booth(
+                "컴퓨터학부",
+                "분식 판매",
+                "https://example.com/booth.jpg",
+                "재료 소진 시 조기 마감",
+                College.ENGINEERING
+        );
 
         entityManager.persist(booth);
         entityManager.flush();
@@ -34,11 +40,27 @@ class BoothEntityMappingTest {
         assertThat(savedBooth).isNotNull();
         assertThat(savedBooth.getName()).isEqualTo("컴퓨터학부");
         assertThat(savedBooth.getNotice()).isEqualTo("재료 소진 시 조기 마감");
+        assertThat(savedBooth.getCollege()).isEqualTo(College.ENGINEERING);
+    }
+
+    @Test
+    void boothCollegeIsStoredAsString() {
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null, College.ICT);
+        entityManager.persist(booth);
+        entityManager.flush();
+
+        String college = jdbcTemplate.queryForObject(
+                "select college from booths where id = ?",
+                String.class,
+                booth.getId()
+        );
+
+        assertThat(college).isEqualTo("ICT");
     }
 
     @Test
     void boothMenuStoresForeignKeyToBooth() {
-        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null, null);
         entityManager.persist(booth);
 
         BoothMenu boothMenu = new BoothMenu(
@@ -61,7 +83,7 @@ class BoothEntityMappingTest {
 
     @Test
     void boothMenuStatusIsStoredAsString() {
-        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null, null);
         entityManager.persist(booth);
 
         BoothMenu boothMenu = new BoothMenu(booth, "떡볶이", 4000, "", null, BoothMenuStatus.SOLD_OUT);
@@ -79,7 +101,7 @@ class BoothEntityMappingTest {
 
     @Test
     void boothMenuRejectsNullStatus() {
-        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null, null);
 
         assertThatThrownBy(() -> new BoothMenu(booth, "떡볶이", 4000, "", null, null))
                 .isInstanceOf(NullPointerException.class)
@@ -92,20 +114,37 @@ class BoothEntityMappingTest {
                 "컴퓨터학부",
                 "분식 판매",
                 "https://example.com/booth.jpg",
-                "재료 소진 시 조기 마감"
+                "재료 소진 시 조기 마감",
+                College.ENGINEERING
         );
 
-        booth.update("소프트웨어학과", null, null, null);
+        booth.update("소프트웨어학과", null, null, null, null);
 
         assertThat(booth.getName()).isEqualTo("소프트웨어학과");
         assertThat(booth.getDescription()).isEqualTo("분식 판매");
         assertThat(booth.getImageUrl()).isEqualTo("https://example.com/booth.jpg");
         assertThat(booth.getNotice()).isEqualTo("재료 소진 시 조기 마감");
+        assertThat(booth.getCollege()).isEqualTo(College.ENGINEERING);
+    }
+
+    @Test
+    void boothUpdateCanChangeCollege() {
+        Booth booth = new Booth(
+                "컴퓨터학부",
+                "분식 판매",
+                "https://example.com/booth.jpg",
+                null,
+                College.ENGINEERING
+        );
+
+        booth.update(null, null, null, null, College.ICT);
+
+        assertThat(booth.getCollege()).isEqualTo(College.ICT);
     }
 
     @Test
     void boothMenuUpdateKeepsImageUrlAndStatusWhenNullIsPassed() {
-        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null);
+        Booth booth = new Booth("컴퓨터학부", "분식 판매", null, null, null);
         BoothMenu boothMenu = new BoothMenu(
                 booth,
                 "떡볶이",

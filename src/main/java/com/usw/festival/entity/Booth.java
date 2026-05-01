@@ -2,6 +2,8 @@ package com.usw.festival.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,17 +29,22 @@ public class Booth extends BaseTimeEntity {
     @Column(length = 100)
     private String notice;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private College college;
+
     protected Booth() {
     }
 
-    public Booth(String name, String description, String imageUrl, String notice) {
+    public Booth(String name, String description, String imageUrl, String notice, College college) {
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
         this.notice = notice;
+        this.college = college;
     }
 
-    public void update(String name, String description, String imageUrl, String notice) {
+    public void update(String name, String description, String imageUrl, String notice, College college) {
         if (name != null) {
             this.name = name;
         }
@@ -49,6 +56,9 @@ public class Booth extends BaseTimeEntity {
         }
         if (notice != null) {
             this.notice = notice;
+        }
+        if (college != null) {
+            this.college = college;
         }
     }
 
@@ -70,5 +80,9 @@ public class Booth extends BaseTimeEntity {
 
     public String getNotice() {
         return notice;
+    }
+
+    public College getCollege() {
+        return college;
     }
 }

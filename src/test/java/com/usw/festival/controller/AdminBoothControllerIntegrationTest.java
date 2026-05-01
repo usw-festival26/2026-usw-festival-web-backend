@@ -9,6 +9,7 @@ import com.usw.festival.dto.booth.BoothUpdateRequest;
 import com.usw.festival.entity.Booth;
 import com.usw.festival.entity.BoothMenu;
 import com.usw.festival.entity.BoothMenuStatus;
+import com.usw.festival.entity.College;
 import com.usw.festival.repository.BoothMenuRepository;
 import com.usw.festival.repository.BoothRepository;
 import jakarta.servlet.http.Cookie;
@@ -72,7 +73,7 @@ class AdminBoothControllerIntegrationTest {
                         .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new BoothCreateRequest("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg")
+                                new BoothCreateRequest("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", College.ENGINEERING)
                         )))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
@@ -82,10 +83,10 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanGetAdminBoothListAndDetail() throws Exception {
         Booth firstBooth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth-1.jpg", "재료 소진 시 조기 마감")
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth-1.jpg", "재료 소진 시 조기 마감", College.ENGINEERING)
         );
         Booth secondBooth = boothRepository.save(
-                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null)
+                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null, College.ICT)
         );
 
         mockMvc.perform(get("/api/admin/booths")
@@ -95,8 +96,12 @@ class AdminBoothControllerIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].boothId").value(firstBooth.getId()))
                 .andExpect(jsonPath("$[0].name").value("컴퓨터학부"))
+                .andExpect(jsonPath("$[0].college").value("ENGINEERING"))
+                .andExpect(jsonPath("$[0].collegeLabel").value("혁신공과대학"))
                 .andExpect(jsonPath("$[1].boothId").value(secondBooth.getId()))
-                .andExpect(jsonPath("$[1].name").value("전자공학과"));
+                .andExpect(jsonPath("$[1].name").value("전자공학과"))
+                .andExpect(jsonPath("$[1].college").value("ICT"))
+                .andExpect(jsonPath("$[1].collegeLabel").value("지능형SW융합대학"));
 
         mockMvc.perform(get("/api/admin/booths/{id}", firstBooth.getId())
                         .secure(true)
@@ -106,7 +111,9 @@ class AdminBoothControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("컴퓨터학부"))
                 .andExpect(jsonPath("$.description").value("분식 판매"))
                 .andExpect(jsonPath("$.imageUrl").value("https://example.com/booth-1.jpg"))
-                .andExpect(jsonPath("$.notice").value("재료 소진 시 조기 마감"));
+                .andExpect(jsonPath("$.notice").value("재료 소진 시 조기 마감"))
+                .andExpect(jsonPath("$.college").value("ENGINEERING"))
+                .andExpect(jsonPath("$.collegeLabel").value("혁신공과대학"));
     }
 
     @Test
@@ -114,7 +121,8 @@ class AdminBoothControllerIntegrationTest {
         BoothCreateRequest request = new BoothCreateRequest(
                 "컴퓨터학부",
                 "분식 판매",
-                "https://example.com/booth.jpg"
+                "https://example.com/booth.jpg",
+                College.ENGINEERING
         );
 
         mockMvc.perform(post("/api/admin/booths")
@@ -128,18 +136,21 @@ class AdminBoothControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("컴퓨터학부"))
                 .andExpect(jsonPath("$.description").value("분식 판매"))
                 .andExpect(jsonPath("$.imageUrl").value("https://example.com/booth.jpg"))
-                .andExpect(jsonPath("$.notice").doesNotExist());
+                .andExpect(jsonPath("$.notice").doesNotExist())
+                .andExpect(jsonPath("$.college").value("ENGINEERING"))
+                .andExpect(jsonPath("$.collegeLabel").value("혁신공과대학"));
 
         Booth savedBooth = boothRepository.findAll().getFirst();
         assertThat(savedBooth.getName()).isEqualTo("컴퓨터학부");
         assertThat(savedBooth.getDescription()).isEqualTo("분식 판매");
         assertThat(savedBooth.getImageUrl()).isEqualTo("https://example.com/booth.jpg");
         assertThat(savedBooth.getNotice()).isNull();
+        assertThat(savedBooth.getCollege()).isEqualTo(College.ENGINEERING);
     }
 
     @Test
     void createBoothValidationFailureReturnsBadRequest() throws Exception {
-        BoothCreateRequest request = new BoothCreateRequest("", "", "");
+        BoothCreateRequest request = new BoothCreateRequest("", "", "", null);
 
         mockMvc.perform(post("/api/admin/booths")
                         .secure(true)
@@ -153,7 +164,8 @@ class AdminBoothControllerIntegrationTest {
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("name")))
                 .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("description")))
-                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("imageUrl")));
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("imageUrl")))
+                .andExpect(jsonPath("$.fieldErrors[*].field", hasItem("college")));
     }
 
     @Test
@@ -161,7 +173,8 @@ class AdminBoothControllerIntegrationTest {
         BoothCreateRequest request = new BoothCreateRequest(
                 "컴퓨터학부",
                 "분식 판매",
-                "not-a-url"
+                "not-a-url",
+                College.ENGINEERING
         );
 
         mockMvc.perform(post("/api/admin/booths")
@@ -180,10 +193,11 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanUpdateOnlyChangedFieldsAndKeepsOthers() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감")
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감", College.ENGINEERING)
         );
         BoothUpdateRequest request = new BoothUpdateRequest(
                 "컴퓨터공학과",
+                null,
                 null,
                 null
         );
@@ -212,7 +226,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void emptyUpdateRequestKeepsExistingFields() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감")
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", "재료 소진 시 조기 마감", College.ENGINEERING)
         );
 
         mockMvc.perform(patch("/api/admin/booths/{id}", booth.getId())
@@ -237,12 +251,35 @@ class AdminBoothControllerIntegrationTest {
     }
 
     @Test
+    void departmentCouncilCanUpdateCollege() throws Exception {
+        Booth booth = boothRepository.save(
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
+        );
+        BoothUpdateRequest request = new BoothUpdateRequest(null, null, null, College.ICT);
+
+        mockMvc.perform(patch("/api/admin/booths/{id}", booth.getId())
+                        .secure(true)
+                        .with(user("department-admin").roles("DEPARTMENT_COUNCIL"))
+                        .cookie(csrfCookie())
+                        .header("X-XSRF-TOKEN", TEST_CSRF_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.college").value("ICT"))
+                .andExpect(jsonPath("$.collegeLabel").value("지능형SW융합대학"));
+
+        Booth updatedBooth = boothRepository.findById(booth.getId()).orElseThrow();
+        assertThat(updatedBooth.getCollege()).isEqualTo(College.ICT);
+    }
+
+    @Test
     void blankFieldOnUpdateReturnsValidationError() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothUpdateRequest request = new BoothUpdateRequest(
                 " ",
+                null,
                 null,
                 null
         );
@@ -272,7 +309,7 @@ class AdminBoothControllerIntegrationTest {
 
     @Test
     void updateUnknownBoothReturnsNotFound() throws Exception {
-        BoothUpdateRequest request = new BoothUpdateRequest("새 이름", null, null);
+        BoothUpdateRequest request = new BoothUpdateRequest("새 이름", null, null, null);
 
         mockMvc.perform(patch("/api/admin/booths/999")
                         .secure(true)
@@ -289,7 +326,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void unauthenticatedRequestToAdminBoothMenuApiReturnsUnauthorized() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
 
         mockMvc.perform(post("/api/admin/booths/{boothId}/menus", booth.getId())
@@ -308,7 +345,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void studentCouncilCannotAccessAdminBoothMenuApi() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
 
         mockMvc.perform(post("/api/admin/booths/{boothId}/menus", booth.getId())
@@ -328,10 +365,10 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanGetAdminBoothMenus() throws Exception {
         Booth firstBooth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         Booth secondBooth = boothRepository.save(
-                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null)
+                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null, College.ICT)
         );
         BoothMenu firstMenu = boothMenuRepository.save(
                 new BoothMenu(firstBooth, "떡볶이", 4000, "", "https://example.com/menu-1.jpg", BoothMenuStatus.ON_SALE)
@@ -368,7 +405,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanCreateBoothMenu() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenuCreateRequest request = new BoothMenuCreateRequest(
                 "떡볶이",
@@ -421,7 +458,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void createBoothMenuValidationFailureReturnsBadRequest() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenuCreateRequest request = new BoothMenuCreateRequest("", 0, "");
 
@@ -443,7 +480,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void invalidImageUrlOnCreateBoothMenuReturnsValidationError() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenuCreateRequest request = new BoothMenuCreateRequest("떡볶이", 4000, "not-a-url");
 
@@ -463,7 +500,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanUpdateOnlyChangedBoothMenuFieldsAndKeepsOthers() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -494,7 +531,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void emptyBoothMenuUpdateRequestKeepsExistingFields() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.SOLD_OUT)
@@ -518,7 +555,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void invalidBoothMenuUpdateRequestReturnsBadRequest() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -543,10 +580,10 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void updateBoothMenuOnAnotherBoothReturnsNotFound() throws Exception {
         Booth firstBooth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         Booth secondBooth = boothRepository.save(
-                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null)
+                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null, College.ICT)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(firstBooth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -568,7 +605,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanUpdateBoothMenuStatus() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -593,7 +630,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void invalidBoothMenuStatusReturnsValidationError() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -615,7 +652,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void departmentCouncilCanDeleteBoothMenu() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -634,10 +671,10 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void deleteBoothMenuOnAnotherBoothReturnsNotFound() throws Exception {
         Booth firstBooth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         Booth secondBooth = boothRepository.save(
-                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null)
+                new Booth("전자공학과", "음료 판매", "https://example.com/booth-2.jpg", null, College.ICT)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(firstBooth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.ON_SALE)
@@ -656,7 +693,7 @@ class AdminBoothControllerIntegrationTest {
     @Test
     void publicBoothMenuApiKeepsKoreanStatusLabel() throws Exception {
         Booth booth = boothRepository.save(
-                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null)
+                new Booth("컴퓨터학부", "분식 판매", "https://example.com/booth.jpg", null, College.ENGINEERING)
         );
         BoothMenu boothMenu = boothMenuRepository.save(
                 new BoothMenu(booth, "떡볶이", 4000, "", "https://example.com/menu.jpg", BoothMenuStatus.SOLD_OUT)
