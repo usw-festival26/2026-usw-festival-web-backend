@@ -109,7 +109,7 @@ class AdminNoticeControllerIntegrationTest {
     }
 
     @Test
-    void studentCouncilCanGetNoticeListAndDetail() throws Exception {
+    void studentCouncilCanGetNoticeListWithContent() throws Exception {
         Notice firstNotice = noticeRepository.save(new Notice("첫 번째 공지", "첫 번째 본문", false));
         Notice secondNotice = noticeRepository.save(new Notice("두 번째 공지", "두 번째 본문", true));
         LoginSession loginSession = login("student-admin", "student-password");
@@ -119,15 +119,19 @@ class AdminNoticeControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].noticeId").value(secondNotice.getId()))
-                .andExpect(jsonPath("$[1].noticeId").value(firstNotice.getId()));
+                .andExpect(jsonPath("$[0].content").value("두 번째 본문"))
+                .andExpect(jsonPath("$[1].noticeId").value(firstNotice.getId()))
+                .andExpect(jsonPath("$[1].content").value("첫 번째 본문"));
+    }
 
-        mockMvc.perform(get("/api/admin/notices/{id}", secondNotice.getId())
+    @Test
+    void studentCouncilCannotGetNoticeDetail() throws Exception {
+        Notice notice = noticeRepository.save(new Notice("상세 제거 공지", "상세 제거 본문", false));
+        LoginSession loginSession = login("student-admin", "student-password");
+
+        mockMvc.perform(get("/api/admin/notices/{id}", notice.getId())
                         .session(loginSession.session()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.noticeId").value(secondNotice.getId()))
-                .andExpect(jsonPath("$.title").value("두 번째 공지"))
-                .andExpect(jsonPath("$.content").value("두 번째 본문"))
-                .andExpect(jsonPath("$.pinned").value(true));
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

@@ -28,10 +28,6 @@ public class NoticeService {
                 .toList();
     }
 
-    public NoticeDetailResponse getNotice(Long id) {
-        return NoticeDetailResponse.from(findNotice(id));
-    }
-
     @Transactional
     public NoticeDetailResponse createNotice(NoticeSaveRequest request) {
         Notice notice = noticeRepository.save(new Notice(request.title(), request.content(), request.pinned()));
