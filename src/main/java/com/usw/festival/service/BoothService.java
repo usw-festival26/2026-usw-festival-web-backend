@@ -50,7 +50,8 @@ public class BoothService {
                         request.name(),
                         request.description(),
                         request.imageUrl(),
-                        null
+                        null,
+                        request.college()
                 )
         );
         return BoothDetailResponse.from(booth);
@@ -63,7 +64,8 @@ public class BoothService {
                 request.name(),
                 request.description(),
                 request.imageUrl(),
-                null
+                null,
+                request.college()
         );
         return BoothDetailResponse.from(booth);
     }
