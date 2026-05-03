@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record NoticeResponse(
         Long noticeId,
         String title,
+        String content,
         boolean pinned,
         LocalDateTime createdAt
 ) {
@@ -14,6 +15,7 @@ public record NoticeResponse(
         return new NoticeResponse(
                 notice.getId(),
                 notice.getTitle(),
+                notice.getContent(),
                 notice.isPinned(),
                 notice.getCreatedAt()
         );

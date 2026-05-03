@@ -19,6 +19,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,6 +41,7 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private static final String NOT_FOUND = "NOT_FOUND";
+    private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
     private static final String BAD_REQUEST = "BAD_REQUEST";
     private static final String VALIDATION_ERROR = "VALIDATION_ERROR";
     private static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
     private static final String INVALID_ENUM_VALUE_MESSAGE = "허용되지 않는 값입니다.";
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "서버 내부 오류가 발생했습니다.";
     private static final String NO_RESOURCE_FOUND_MESSAGE = "존재하지 않는 요청 경로입니다.";
+    private static final String METHOD_NOT_ALLOWED_MESSAGE = "지원하지 않는 HTTP 메서드입니다.";
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> handleNoSuchElement(NoSuchElementException e, HttpServletRequest request) {
@@ -57,6 +60,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e, HttpServletRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, NOT_FOUND, NO_RESOURCE_FOUND_MESSAGE, request.getRequestURI());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException e,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                METHOD_NOT_ALLOWED,
+                METHOD_NOT_ALLOWED_MESSAGE,
+                request.getRequestURI()
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

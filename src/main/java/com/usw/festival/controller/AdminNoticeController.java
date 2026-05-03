@@ -35,11 +35,6 @@ public class AdminNoticeController {
         return ResponseEntity.ok(noticeService.getNotices());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<NoticeDetailResponse> getNotice(@PathVariable Long id) {
-        return ResponseEntity.ok(noticeService.getNotice(id));
-    }
-
     @PostMapping
     public ResponseEntity<NoticeDetailResponse> createNotice(@Valid @RequestBody NoticeSaveRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
