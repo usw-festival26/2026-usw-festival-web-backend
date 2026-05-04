@@ -79,7 +79,7 @@ public class SecurityConfig {
     public CsrfTokenRepository csrfTokenRepository() {
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokenRepository.setCookieCustomizer(cookie -> cookie
-                .domain(".usw-festival.site")
+                .domain("usw-festival.site")
                 .path("/")
                 .secure(true)
                 .sameSite("None"));
